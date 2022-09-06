@@ -56,7 +56,7 @@
 
     // Rotary encoder
     #ifdef USEROTARY_ENABLE
-        //#define REVERSE_ROTARY                        // To reverse encoder's direction; switching CLK / DT in hardware does the same
+        #define REVERSE_ROTARY                          // To reverse encoder's direction; switching CLK / DT in hardware does the same
         #define ROTARYENCODER_CLK           34          // rotary encoder's CLK
         #define ROTARYENCODER_DT            39          // 39 = 'VN'; rotary encoder's DT
     #endif
@@ -92,9 +92,9 @@
     #define WAKEUP_BUTTON                   36          // Defines the button that is used to wake up ESPuino from deepsleep; set to 99 to disable
 
     // Power-control
-    #define POWER                           32          // GPIO used to drive transistor-circuit, that switches off peripheral devices while ESP32-deepsleep
+    #define POWER                           115          // GPIO used to drive transistor-circuit, that switches off peripheral devices while ESP32-deepsleep
     #ifdef POWER
-        //#define INVERT_POWER                          // If enabled, use inverted logic for POWER circuit, that means peripherals are turned off by writing HIGH
+        #define INVERT_POWER                          // If enabled, use inverted logic for POWER circuit, that means peripherals are turned off by writing HIGH
     #endif
 
     // (optional) Neopixel
@@ -115,8 +115,8 @@
 
     // (optional) For measuring battery-voltage a voltage-divider is already onboard. Connect a LiPo and use it!
     #ifdef MEASURE_BATTERY_VOLTAGE
-        constexpr uint16_t rdiv1 = 100;                 // Don't change, it's built in
-        constexpr uint16_t rdiv2 = 100;                 // Don't change, it's built in
+        constexpr uint16_t rdiv1 = 300;                 // Don't change, it's built in
+        constexpr uint16_t rdiv2 = 300;                 // Don't change, it's built in
     #endif
 
     // (optional) hallsensor. Make sure the GPIO defined doesn't overlap with existing configuration. Please note: only user-support is provided for this feature.

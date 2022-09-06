@@ -31,17 +31,17 @@
 
 
 	//########################## MODULES #################################
-	//#define PORT_EXPANDER_ENABLE          // When enabled, buttons can be connected via port-expander PCA9555 (https://forum.espuino.de/t/einsatz-des-port-expanders-pca9555/306)
+	#define PORT_EXPANDER_ENABLE          // When enabled, buttons can be connected via port-expander PCA9555 (https://forum.espuino.de/t/einsatz-des-port-expanders-pca9555/306)
 	//#define I2S_COMM_FMT_LSB_ENABLE       // Enables FMT instead of MSB for I2S-communication-format. Used e.g. by PT2811. Don't enable for MAX98357a, AC101 or PCM5102A)
 	#define MDNS_ENABLE                     // When enabled, you don't have to handle with ESPuino's IP-address. If hostname is set to "ESPuino", you can reach it via ESPuino.local
 	//#define MQTT_ENABLE                   // Make sure to configure mqtt-server and (optionally) username+pwd
 	#define FTP_ENABLE                      // Enables FTP-server; DON'T FORGET TO ACTIVATE AFTER BOOT BY PRESSING PAUSE + NEXT-BUTTONS (IN PARALLEL)!
 	#define NEOPIXEL_ENABLE                 // Don't forget configuration of NUM_LEDS if enabled
-	//#define NEOPIXEL_REVERSE_ROTATION     // Some Neopixels are adressed/soldered counter-clockwise. This can be configured here.
+	#define NEOPIXEL_REVERSE_ROTATION     // Some Neopixels are adressed/soldered counter-clockwise. This can be configured here.
 	#define LANGUAGE DE                     // DE = deutsch; EN = english
 	//#define STATIC_IP_ENABLE              // DEPRECATED: Enables static IP-configuration (change static ip-section accordingly)
 	#define HEADPHONE_ADJUST_ENABLE         // Used to adjust (lower) volume for optional headphone-pcb (refer maxVolumeSpeaker / maxVolumeHeadphone) and to enable stereo (if PLAY_MONO_SPEAKER is set)
-	//#define PLAY_MONO_SPEAKER             // If only one speaker is used enabling mono should make sense. Please note: headphones is always stereo (if HEADPHONE_ADJUST_ENABLE is active)
+	#define PLAY_MONO_SPEAKER             // If only one speaker is used enabling mono should make sense. Please note: headphones is always stereo (if HEADPHONE_ADJUST_ENABLE is active)
 	#define SHUTDOWN_IF_SD_BOOT_FAILS       // Will put ESP to deepsleep if boot fails due to SD. Really recommend this if there's in battery-mode no other way to restart ESP! Interval adjustable via deepsleepTimeAfterBootFails.
 	#define MEASURE_BATTERY_VOLTAGE         // Enables battery-measurement via GPIO (ADC) and voltage-divider
 	//#define MEASURE_BATTERY_MAX17055      // Enables battery-measurement via external fuel gauge (MAX17055)
@@ -71,16 +71,16 @@
 
 
 	//################## select RFID reader ##############################
-	#define RFID_READER_TYPE_MFRC522_SPI    // use MFRC522 via SPI
+	//#define RFID_READER_TYPE_MFRC522_SPI    // use MFRC522 via SPI
 	//#define RFID_READER_TYPE_MFRC522_I2C  // use MFRC522 via I2C
-	//#define RFID_READER_TYPE_PN5180       // use PN5180 via SPI
+	#define RFID_READER_TYPE_PN5180       // use PN5180 via SPI
 
 	#ifdef RFID_READER_TYPE_MFRC522_I2C
 		#define MFRC522_ADDR 0x28           // default I2C-address of MFRC522
 	#endif
 
 	#ifdef RFID_READER_TYPE_PN5180
-		//#define PN5180_ENABLE_LPCD        // Wakes up ESPuino if RFID-tag was applied while deepsleep is active.
+		#define PN5180_ENABLE_LPCD        // Wakes up ESPuino if RFID-tag was applied while deepsleep is active.
 	#endif
 
 	#if defined(RFID_READER_TYPE_MFRC522_I2C) || defined(RFID_READER_TYPE_MFRC522_SPI)
@@ -128,14 +128,14 @@
 	#define BUTTON_4_SHORT    CMD_SEEK_BACKWARDS
 	#define BUTTON_5_SHORT    CMD_SEEK_FORWARDS
 
-	#define BUTTON_0_LONG     CMD_LASTTRACK
-	#define BUTTON_1_LONG     CMD_FIRSTTRACK
-	#define BUTTON_2_LONG     CMD_PLAYPAUSE
+	#define BUTTON_0_LONG     CMD_SEEK_FORWARDS
+	#define BUTTON_1_LONG     CMD_SEEK_BACKWARDS
+	#define BUTTON_2_LONG     CMD_SLEEP_TIMER_MOD_30
 	#define BUTTON_3_LONG     CMD_SLEEPMODE
 	#define BUTTON_4_LONG     CMD_VOLUMEUP
 	#define BUTTON_5_LONG     CMD_VOLUMEDOWN
 
-	#define BUTTON_MULTI_01   CMD_NOTHING   //CMD_TOGGLE_WIFI_STATUS (disabled now to prevent children from unwanted WiFi-disable)
+	#define BUTTON_MULTI_01   CMD_TOGGLE_BLUETOOTH_SOURCE_MODE   //CMD_TOGGLE_WIFI_STATUS (disabled now to prevent children from unwanted WiFi-disable)
 	#define BUTTON_MULTI_02   CMD_ENABLE_FTP_SERVER
 	#define BUTTON_MULTI_03   CMD_NOTHING
 	#define BUTTON_MULTI_04   CMD_NOTHING
@@ -213,8 +213,9 @@
 	// (optinal) Neopixel
 	#ifdef NEOPIXEL_ENABLE
 		#define NUM_INDICATOR_LEDS		24          	// number of Neopixel LEDs (formerly NUM_LEDS)
-		#define NUM_CONTROL_LEDS		0		// optional control leds (https://forum.espuino.de/t/statische-ws2812-leds/1703)
-                #define CONTROL_LEDS_COLORS		{}		// Colors for the control LEDs. Make sure it lists at least NUM_CONTROL_LEDS colors, e.g. for three control LEDs define: CONTROL_LEDS_COLORS {CRGB::Yellow, CRGB::Blue, 0xFFFFFF} (predefined colors: http://fastled.io/docs/3.1/struct_c_r_g_b.html)
+		#define NUM_CONTROL_LEDS		5		// optional control leds (https://forum.espuino.de/t/statische-ws2812-leds/1703)
+                #define CONTROL_LEDS_COLORS		{CRGB::Red, CRGB::Yellow, CRGB::Blue, CRGB::Blue, CRGB::Green}
+		// Colors for the control LEDs. Make sure it lists at least NUM_CONTROL_LEDS colors, e.g. for three control LEDs define: CONTROL_LEDS_COLORS {CRGB::Yellow, CRGB::Blue, 0xFFFFFF} (predefined colors: http://fastled.io/docs/3.1/struct_c_r_g_b.html)
 		#define CHIPSET					WS2812B     	// type of Neopixel
 		#define COLOR_ORDER				GRB
 		#define NUM_LEDS_IDLE_DOTS		4           	// count of LEDs, which are shown when Idle
