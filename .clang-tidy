@@ -1,0 +1,84 @@
+---
+Checks:          '
+-*,
+bugprone-*,
+cert-*,
+clang-diagnostic-*,
+clang-analyzer-*,
+concurrency-*,
+cppcoreguidelines-*,
+hicpp-*,
+misc-*,
+modernize-*,
+performance-*,
+portability-*,
+readability-*,
+
+# Reserved Identifier,
+-bugprone-reserved-identifier,
+-cert-dcl37-c,
+-cert-dcl51-cpp,
+
+# Global variables,
+-cppcoreguidelines-avoid-non-const-global-variables,
+
+# Redundand void,
+-modernize-redundant-void-arg,
+
+# Magic numbers,
+-cppcoreguidelines-avoid-magic-numbers,
+-readability-magic-numbers,
+
+# Raw string literals,
+-modernize-raw-string-literal,
+
+# Decay array to pointer,
+-cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+-hicpp-no-array-decay,
+
+# Unused paramter,
+-misc-unused-parameters,
+
+# Suggests trailing return,
+-modernize-use-trailing-return-type,
+
+# Suggests variadic templates instead va_list/va_arg,
+-cppcoreguidelines-pro-type-vararg,
+-hicpp-vararg,
+
+# Suggests no else after return,
+-readability-else-after-return,
+
+# Macros,
+-cppcoreguidelines-macro-usage,
+
+# Bool conversion,
+-readability-implicit-bool-conversion,
+
+# C-style arrays,
+-cppcoreguidelines-avoid-c-arrays,
+-hicpp-avoid-c-arrays,
+-modernize-avoid-c-arrays,
+
+# Readability suffix,
+-hicpp-uppercase-literal-suffix,
+-readability-uppercase-literal-suffix,
+
+# Suggests using instead typedefs,
+-modernize-use-using,
+
+# No manual memory management,
+-cppcoreguidelines-no-malloc,
+-hicpp-no-malloc,
+-cppcoreguidelines-owning-memory,
+
+# Complexity,
+-readability-function-cognitive-complexity,
+
+# Init vars,
+-cppcoreguidelines-init-variables,
+'
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle: none
