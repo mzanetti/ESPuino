@@ -506,15 +506,7 @@ void AudioPlayer_Task(void *parameter) {
 						}
 						audio->stopSong();
 						Led_Indicate(LedIndicatorType::Rewind);
-						audioReturnCode = audio->connecttoFS(gFSystem, *(gPlayProperties.playlist + gPlayProperties.currentTrackNumber));
-						// consider track as finished, when audio lib call was not successful
-						if (!audioReturnCode) {
-							System_IndicateError();
-							gPlayProperties.trackFinished = true;
-							continue;
-						}
 						Log_Println((char *) FPSTR(trackStart), LOGLEVEL_INFO);
-						continue;
 					}
 					break;
 
