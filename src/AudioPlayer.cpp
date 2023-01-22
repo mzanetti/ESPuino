@@ -1112,6 +1112,9 @@ void audio_eof_mp3(const char *info) { //end of file
 	snprintf(Log_Buffer, Log_BufferLength, "eof_mp3     : %s", info);
 	Log_Println(Log_Buffer, LOGLEVEL_INFO);
 	gPlayProperties.trackFinished = true;
+#ifdef DONT_ACCEPT_SAME_RFID_TWICE_ENABLE
+	strncpy(gOldRfidTagId, "X", cardIdStringSize-1);
+#endif
 }
 
 void audio_showstation(const char *info) {
