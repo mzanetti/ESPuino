@@ -190,6 +190,16 @@ bool Led_NeedsProgressRedraw(bool lastPlayState, bool lastLockState,
 	return false;
 }
 
+#ifdef NEOPIXEL_ENABLE
+	static void Led_Sync(CRGB *leds) {
+                static CRGB::HTMLColorCode staticLeds[STATIC_LEDS] = STATIC_LEDS_COLOR;
+		for (uint8_t staticLed = 0; staticLed < STATIC_LEDS; staticLed++) {
+			leds[staticLed + NUM_LEDS] = staticLeds[staticLed];
+		}
+		FastLED.show();
+	}
+#endif
+
 static void Led_Task(void *parameter) {
 	#ifdef NEOPIXEL_ENABLE
 		static uint8_t hlastVolume = AudioPlayer_GetCurrentVolume();
@@ -210,8 +220,8 @@ static void Led_Task(void *parameter) {
 		static CRGB::HTMLColorCode idleColor;
 		static CRGB::HTMLColorCode speechColor = CRGB::Yellow;
 		static CRGB::HTMLColorCode generalColor;
-		static CRGB leds[NUM_LEDS];
-		FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
+		static CRGB leds[NUM_LEDS + STATIC_LEDS];
+		FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS + STATIC_LEDS).setCorrection(TypicalSMD5050);
 		FastLED.setBrightness(Led_Brightness);
 
 		for (;;) {
@@ -228,6 +238,7 @@ static void Led_Task(void *parameter) {
 				vTaskDelay(portTICK_RATE_MS * 10);
 				continue;
 			}
+
 			// Multi-LED: rotates orange unless boot isn't complete
 			// Single-LED: blinking orange
 			if (!LED_INDICATOR_IS_SET(LedIndicatorType::BootComplete)) {
@@ -251,7 +262,7 @@ static void Led_Task(void *parameter) {
 						}
 					}
 				}
-				FastLED.show();
+				Led_Sync(leds);
 				showEvenError = !showEvenError;
 				vTaskDelay(portTICK_RATE_MS * 500);
 				continue;
@@ -272,14 +283,14 @@ static void Led_Task(void *parameter) {
 						FastLED.clear();
 						if (millis() - gButtons[gShutdownButton].firstPressedTimestamp <= intervalToLongPress) {
 							leds[0] = CRGB::Red;
-							FastLED.show();
+							Led_Sync(leds);
 						} else {
 							if (singleLedStatus) {
 								leds[0] = CRGB::Red;
 							} else {
 								leds[0] = CRGB::Black;
 							}
-							FastLED.show();
+							Led_Sync(leds);
 							singleLedStatus = !singleLedStatus;
 							vTaskDelay(portTICK_RATE_MS * 50);
 						}
@@ -292,11 +303,11 @@ static void Led_Task(void *parameter) {
 						for (uint8_t led = 0; led < NUM_LEDS; led++) {
 							leds[Led_Address(led)] = CRGB::Red;
 							if (gButtons[gShutdownButton].currentState) {
-								FastLED.show();
+								Led_Sync(leds);
 								vTaskDelay(portTICK_RATE_MS * 5);
 								break;
 							}
-							FastLED.show();
+							Led_Sync(leds);
 							vTaskDelay(intervalToLongPress / NUM_LEDS * portTICK_RATE_MS);
 						}
 					}
@@ -323,7 +334,7 @@ static void Led_Task(void *parameter) {
 						} else {
 							leds[0] = CRGB::Black;
 						}
-						FastLED.show();
+						Led_Sync(leds);
 						singleLedStatus = !singleLedStatus;
 						vTaskDelay(portTICK_RATE_MS * 100);
 					}
@@ -331,7 +342,7 @@ static void Led_Task(void *parameter) {
 					for (uint8_t led = 0; led < NUM_LEDS; led++) {
 						leds[Led_Address(led)] = CRGB::Red;
 					}
-					FastLED.show();
+					Led_Sync(leds);
 					vTaskDelay(portTICK_RATE_MS * 200);
 				}
 			}
@@ -351,7 +362,7 @@ static void Led_Task(void *parameter) {
 						} else {
 							leds[0] = CRGB::Black;
 						}
-						FastLED.show();
+						Led_Sync(leds);
 						singleLedStatus = !singleLedStatus;
 						vTaskDelay(portTICK_RATE_MS * 100);
 					}
@@ -359,7 +370,7 @@ static void Led_Task(void *parameter) {
 					for (uint8_t led = 0; led < NUM_LEDS; led++) {
 						leds[Led_Address(led)] = CRGB::Green;
 					}
-					FastLED.show();
+					Led_Sync(leds);
 					vTaskDelay(portTICK_RATE_MS * 400);
 				}
 			}
@@ -375,14 +386,14 @@ static void Led_Task(void *parameter) {
 					for (uint8_t led = 0; led < NUM_LEDS; led++) {
 						leds[Led_Address(led)] = CRGB::Red;
 					}
-					FastLED.show();
+					Led_Sync(leds);
 					vTaskDelay(portTICK_RATE_MS * 200);
 					FastLED.clear();
 
 					for (uint8_t led = 0; led < NUM_LEDS; led++) {
 						leds[Led_Address(led)] = CRGB::Black;
 					}
-					FastLED.show();
+					Led_Sync(leds);
 					vTaskDelay(portTICK_RATE_MS * 200);
 				}
 			}
@@ -406,7 +417,7 @@ static void Led_Task(void *parameter) {
 						} else {
 							leds[0] = CRGB::Green;
 						}
-						FastLED.show();
+						Led_Sync(leds);
 					} else {
 						uint8_t numLedsToLight = batteryLevel * NUM_LEDS;
 						if (numLedsToLight > NUM_LEDS) {    // Can happen e.g. if no battery is connected
@@ -420,10 +431,10 @@ static void Led_Task(void *parameter) {
 							} else {
 								leds[Led_Address(led)] = CRGB::Green;
 							}
-							FastLED.show();
+							Led_Sync(leds);
 							vTaskDelay(portTICK_RATE_MS * 20);
 						}
-						FastLED.show();
+						Led_Sync(leds);
 					}
 
 					for (uint8_t i = 0; i <= 100; i++) {
@@ -473,7 +484,7 @@ static void Led_Task(void *parameter) {
 					}
 				}
 
-				FastLED.show();
+				Led_Sync(leds);
 
 				// abort volume change indication if necessary
 				if (LED_INDICATOR_IS_SET(LedIndicatorType::Error) ||
@@ -496,7 +507,7 @@ static void Led_Task(void *parameter) {
 			if (NUM_LEDS >= 4) {
 				for (uint8_t i = NUM_LEDS - 1; i > 0; i--) {
 					leds[Led_Address(i)] = CRGB::Black;
-					FastLED.show();
+					Led_Sync(leds);
 					if (hlastVolume != AudioPlayer_GetCurrentVolume() || lastLedBrightness != Led_Brightness || LED_INDICATOR_IS_SET(LedIndicatorType::Error) || LED_INDICATOR_IS_SET(LedIndicatorType::Ok) || !gButtons[gShutdownButton].currentState || System_IsSleepRequested()) {
 						break;
 					} else {
@@ -516,7 +527,7 @@ static void Led_Task(void *parameter) {
 					FastLED.clear();
 					for (uint8_t i = 0; i < numLedsToLight; i++) {
 						leds[Led_Address(i)] = CRGB::Blue;
-						FastLED.show();
+						Led_Sync(leds);
 						#ifdef BATTERY_MEASURE_ENABLE
 							if (hlastVolume != AudioPlayer_GetCurrentVolume() || lastLedBrightness != Led_Brightness || LED_INDICATOR_IS_SET(LedIndicatorType::Error) || LED_INDICATOR_IS_SET(LedIndicatorType::Ok) || LED_INDICATOR_IS_SET(LedIndicatorType::VoltageWarning) || LED_INDICATOR_IS_SET(LedIndicatorType::Voltage) || !gButtons[gShutdownButton].currentState || System_IsSleepRequested()) {
 						#else
@@ -542,7 +553,7 @@ static void Led_Task(void *parameter) {
 
 					for (uint8_t i = numLedsToLight; i > 0; i--) {
 						leds[Led_Address(i) - 1] = CRGB::Black;
-						FastLED.show();
+						Led_Sync(leds);
 						#ifdef BATTERY_MEASURE_ENABLE
 							if (hlastVolume != AudioPlayer_GetCurrentVolume() || lastLedBrightness != Led_Brightness || LED_INDICATOR_IS_SET(LedIndicatorType::Error) || LED_INDICATOR_IS_SET(LedIndicatorType::Ok) || LED_INDICATOR_IS_SET(LedIndicatorType::VoltageWarning) || LED_INDICATOR_IS_SET(LedIndicatorType::Voltage) || !gButtons[gShutdownButton].currentState || System_IsSleepRequested()) {
 						#else
@@ -608,7 +619,7 @@ static void Led_Task(void *parameter) {
 							leds[(Led_Address(i) + NUM_LEDS / 2) % NUM_LEDS] = idleColor;
 							leds[(Led_Address(i) + NUM_LEDS / 4 * 3) % NUM_LEDS] = idleColor;
 						}
-						FastLED.show();
+						Led_Sync(leds);
 						for (uint8_t i = 0; i <= 50; i++) {
 							#ifdef BATTERY_MEASURE_ENABLE
 								if (hlastVolume != AudioPlayer_GetCurrentVolume() || lastLedBrightness != Led_Brightness || LED_INDICATOR_IS_SET(LedIndicatorType::Error) || LED_INDICATOR_IS_SET(LedIndicatorType::Ok) || LED_INDICATOR_IS_SET(LedIndicatorType::VoltageWarning) || LED_INDICATOR_IS_SET(LedIndicatorType::Voltage) || gPlayProperties.playMode != NO_PLAYLIST || !gButtons[gShutdownButton].currentState || System_IsSleepRequested()) {
@@ -635,7 +646,7 @@ static void Led_Task(void *parameter) {
 					} else {
 						leds[0] = CRGB::Black;
 					}
-					FastLED.show();
+					Led_Sync(leds);
 					vTaskDelay(portTICK_RATE_MS * 100);
 				} else {
 					for (uint8_t i = 0; i < NUM_LEDS; i++) {
@@ -651,7 +662,7 @@ static void Led_Task(void *parameter) {
 							leds[(Led_Address(i) + NUM_LEDS / 2) % NUM_LEDS] = CRGB::BlueViolet;
 							leds[(Led_Address(i) + NUM_LEDS / 4 * 3) % NUM_LEDS] = CRGB::BlueViolet;
 						}
-						FastLED.show();
+						Led_Sync(leds);
 						if (gPlayProperties.playMode != BUSY) {
 							break;
 						}
@@ -672,7 +683,7 @@ static void Led_Task(void *parameter) {
 
 					if (requestClearLeds) {
 						FastLED.clear();
-						FastLED.show();
+						Led_Sync(leds);
 						requestClearLeds = false;
 					}
 
@@ -750,7 +761,7 @@ static void Led_Task(void *parameter) {
 							}
 						}
 					}
-					FastLED.show();
+					Led_Sync(leds);
 					vTaskDelay(portTICK_RATE_MS * 5);
 				}
 			}
