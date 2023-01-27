@@ -318,7 +318,43 @@ void Port_Write(const uint8_t _channel, const bool _newState, const bool _initGp
 		}
 	}
 
-	// Reads input from port-expander and writes output into global array
+	void Port_ExpanderHandler(void) {
+		static bool verifyChangeOfInput[2] = {false, false};	// Used to debounce once in case of input-change
+		static uint8_t inputChannelBuffer[2];
+
+		// If interrupt-handling is active, only read port-expander's register if interrupt was fired
+		#ifdef PE_INTERRUPT_PIN_ENABLE
+			if (!Port_AllowReadFromPortExpander && !Port_AllowInitReadFromPortExpander && !verifyChangeOfInput[0] && !verifyChangeOfInput[1]) {
+				//Serial.println("Interrupt false!");
+				return;
+			} else if (Port_AllowInitReadFromPortExpander) {
+				Port_AllowInitReadFromPortExpander = false;
+			} else if (Port_AllowReadFromPortExpander || Port_AllowInitReadFromPortExpander) {
+				//Serial.println("Interrupt true!");
+				Port_AllowReadFromPortExpander = false;
+			}
+		#endif
+
+		i2cBusTwo.beginTransmission(expanderI2cAddress);
+		for (uint8_t i = 0; i < 2; i++) {
+			i2cBusTwo.write(0x00 + i);                      // Pointer to input-register...
+			i2cBusTwo.endTransmission();
+			i2cBusTwo.requestFrom(expanderI2cAddress, 1u);   // ...and read its byte
+
+			if (i2cBusTwo.available()) {
+				inputChannelBuffer[i] = i2cBusTwo.read();
+				if (inputChannelBuffer[i] != Port_ExpanderPortsInputChannelStatus[i] && millis() >= 10000 && !verifyChangeOfInput[i]) {
+					verifyChangeOfInput[i] = true;
+					Serial.println("Verify set!");
+				} else {
+					verifyChangeOfInput[i] = false;
+					Port_ExpanderPortsInputChannelStatus[i] = inputChannelBuffer[i];
+				}
+			}
+		}
+	}
+
+/*	// Reads input from port-expander and writes output into global array
 	// Datasheet: https://www.nxp.com/docs/en/data-sheet/PCA9555.pdf
 	void Port_ExpanderHandler(void) {
 		// If interrupt-handling is active, only read port-expander's register if interrupt was fired
@@ -346,7 +382,7 @@ void Port_Write(const uint8_t _channel, const bool _newState, const bool _initGp
 			}
 		}
 	}
-
+*/
 	// Make sure ports are read finally at shutdown in order to clear any active IRQs that could cause re-wakeup immediately
 	void Port_Exit(void) {
 		Port_MakeSomeChannelsOutputForShutdown();
